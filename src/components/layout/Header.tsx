@@ -49,7 +49,7 @@ const Header: React.FC = () => {
               <User className="w-4 h-4 text-white" />
             </div>
             <div className="hidden sm:block">
-              <p className="text-sm font-medium text-gray-900">Diya Noor</p>
+              <p className="text-sm font-medium text-gray-900">Salma Noor</p>
               <p className="text-xs text-gray-500">Audio Analyst</p>
             </div>
           </div>
