@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Header from './components/layout/Header';
 import Sidebar from './components/layout/Sidebar';
 import Dashboard from './pages/Dashboard';
+import Transcribe from './pages/Transcribe';
 import { useAppStore } from './store';
 
 const queryClient = new QueryClient();
@@ -14,6 +15,8 @@ function App() {
     switch (currentPage) {
       case 'dashboard':
         return <Dashboard />;
+      case 'transcribe':
+        return <Transcribe />;
       case 'analysis':
         return <div className="p-6">Analysis Page - Coming Soon</div>;
       case 'reports':
