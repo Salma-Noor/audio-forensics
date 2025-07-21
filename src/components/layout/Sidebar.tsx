@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import {
   LayoutDashboard,
   Microscope,
@@ -8,6 +8,7 @@ import {
   AudioWaveform,
   Shield,
   BarChart3,
+  AudioLines, // new icon
 } from "lucide-react";
 import { useAppStore } from "../../store";
 
@@ -15,7 +16,7 @@ interface NavItem {
   id: string;
   label: string;
   icon: React.ReactNode;
-  page: "dashboard" | "analysis" | "reports" | "settings";
+  page: "dashboard" | "analysis" | "reports" | "settings" | "transcribe"; // ⬅️ add 'transcribe'
   badge?: string;
 }
 
@@ -35,6 +36,12 @@ const Sidebar: React.FC = () => {
       icon: <Microscope className="w-5 h-5" />,
       page: "analysis",
       badge: "NEW",
+    },
+    {
+      id: "transcribe", // ⬅️ added new nav item
+      label: "Transcribe Audio",
+      icon: <AudioLines className="w-5 h-5" />, // use any relevant Lucide icon
+      page: "transcribe",
     },
     {
       id: "reports",
