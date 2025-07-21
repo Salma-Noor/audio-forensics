@@ -19,7 +19,7 @@ export interface AnalysisResult {
 }
 
 interface AppState {
-  currentPage: 'dashboard' | 'analysis' | 'reports' | 'settings';
+  currentPage: 'dashboard' | 'Transcribe' | 'analysis' | 'reports' | 'settings';
   setCurrentPage: (page: AppState['currentPage']) => void;
   audioFiles: AudioFile[];
   selectedAudioFile: AudioFile | null;
