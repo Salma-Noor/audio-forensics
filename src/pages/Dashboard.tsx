@@ -1,241 +1,125 @@
-import React from 'react';
-import { 
-  Upload, 
-  FileAudio, 
-  Activity, 
-  Shield, 
-  BarChart3, 
-  Clock,
-  CheckCircle,
-  AlertTriangle,
-  TrendingUp
-} from 'lucide-react';
-import { useAppStore } from '../store';
-import AudioUploader from '../components/audio/AudioUploader';
+import React, { useState } from 'react';
+import ActionButton from '../components/ui/ActionButton';
 
 const Dashboard: React.FC = () => {
-  const { audioFiles, analysisResults } = useAppStore();
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [transcription, setTranscription] = useState<string | null>(null);
+  const [sentiment, setSentiment] = useState<string | null>(null);
+  const [uploadMessage, setUploadMessage] = useState<string>("");
 
-  const stats = [
-    {
-      title: 'Audio Files',
-      value: audioFiles.length.toString(),
-      change: '+12%',
-      icon: <FileAudio className="w-6 h-6" />,
-      color: 'bg-blue-500'
-    },
-    {
-      title: 'Analyses Complete',
-      value: analysisResults.length.toString(),
-      change: '+23%',
-      icon: <Activity className="w-6 h-6" />,
-      color: 'bg-green-500'
-    },
-    {
-      title: 'Authenticity Score',
-      value: '94.7%',
-      change: '+2.1%',
-      icon: <Shield className="w-6 h-6" />,
-      color: 'bg-purple-500'
-    },
-    {
-      title: 'Processing Time',
-      value: '2.3s',
-      change: '-15%',
-      icon: <Clock className="w-6 h-6" />,
-      color: 'bg-orange-500'
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.length) {
+      const file = e.target.files[0];
+      setAudioFile(file);
+      setUploadMessage(`Audio Uploaded: ${file.name}`);
+      setTranscription(null);
+      setSentiment(null);
     }
-  ];
+  };
 
-  const recentAnalyses = [
-    {
-      id: '1',
-      filename: 'interview_recording.wav',
-      type: 'Authentication',
-      status: 'completed',
-      authenticity: 98.5,
-      timestamp: '2 minutes ago'
-    },
-    {
-      id: '2',
-      filename: 'phone_call_evidence.mp3',
-      type: 'Noise Reduction',
-      status: 'processing',
-      authenticity: null,
-      timestamp: '5 minutes ago'
-    },
-    {
-      id: '3',
-      filename: 'conference_audio.wav',
-      type: 'Spectral Analysis',
-      status: 'completed',
-      authenticity: 87.2,
-      timestamp: '1 hour ago'
+  const handleTranscribe = async () => {
+    if (!audioFile) {
+      alert("Please upload an audio.");
+      return;
     }
-  ];
 
-  const handleAudioUpload = (file: File) => {
-    console.log('Audio file uploaded:', file.name);
+    const formData = new FormData();
+    formData.append("file", audioFile);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/transcribe/", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Transcription failed");
+      }
+
+      setTranscription(result.transcription);
+    } catch (error) {
+      console.error("Error:", error);
+      setTranscription("An error occurred during transcription.");
+    }
+  };
+
+  const handleSentiment = async () => {
+    if (!audioFile) {
+      alert("Please upload an audio.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", audioFile);
+
+    try {
+      const response = await fetch("http://localhost:8000/sentiment/", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Sentiment analysis failed");
+      }
+
+      setSentiment(result.sentiment);
+    } catch (error) {
+      console.error("Error:", error);
+      setSentiment("An error occurred during sentiment analysis.");
+    }
   };
 
   return (
-    <div className="p-6 pt-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Audio Forensics Dashboard
+    <div className="min-h-screen bg-white px-6 py-8">
+      {/* Header */}
+      <div className="bg-[#a94064] rounded-xl py-8 px-4 text-center mb-10">
+        <h1 className="text-white text-[60px] font-bold font-sans leading-tight">
+          Audio Forensics and Tampering Detection
         </h1>
-        <p className="text-gray-600">
-          Monitor and analyze audio evidence with professional forensics tools
-        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">
-                  {stat.title}
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stat.value}
-                </p>
-                <p className="text-sm text-green-600 flex items-center mt-1">
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  {stat.change}
-                </p>
-              </div>
-              <div className={`p-3 rounded-xl ${stat.color}`}>
-                <span className="text-white">{stat.icon}</span>
-              </div>
-            </div>
-          </div>
-        ))}
+      {/* File Upload */}
+      <div className="mb-16 flex flex-col items-center space-y-4">
+        <label className="text-[#a94064] text-2xl font-semibold">
+          Choose Audio File
+        </label>
+
+        <input
+          type="file"
+          accept="audio/*"
+          onChange={handleFileChange}
+          className="text-lg text-gray-800 border-2 border-[#a94064] px-6 py-4 rounded-xl w-96 cursor-pointer shadow-md hover:shadow-lg transition"
+        />
+
+        {uploadMessage && (
+          <p className="text-md text-gray-700 mt-2 font-medium">{uploadMessage}</p>
+        )}
       </div>
 
-      {/* Main Content Grid with Equal Heights */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Quick Actions - Left Side */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full flex flex-col">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Quick Actions
-            </h2>
-            <div className="space-y-3 flex-1">
-              <AudioUploader onUpload={handleAudioUpload} />
-              
-              <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <Shield className="w-5 h-5 text-gray-600" />
-                <div className="text-left">
-                  <p className="font-medium text-gray-700">
-                    Start Authentication
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Verify audio authenticity
-                  </p>
-                </div>
-              </button>
-              
-              <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <BarChart3 className="w-5 h-5 text-gray-600" />
-                <div className="text-left">
-                  <p className="font-medium text-gray-700">
-                    Spectral Analysis
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Analyze frequency patterns
-                  </p>
-                </div>
-              </button>
-            </div>
-          </div>
+      {/* Action Buttons */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-items-center mb-16">
+        <ActionButton onClick={handleTranscribe} text="Transcribe" />
+        <ActionButton onClick={handleSentiment} text="Sentiment Analysis" />
+      </div>
 
-          {/* Show uploaded files below Quick Actions */}
-          {audioFiles.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Uploaded Files ({audioFiles.length})
-              </h3>
-              <div className="space-y-2">
-                {audioFiles.map((file) => (
-                  <div key={file.id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
-                    <FileAudio className="w-4 h-4 text-blue-600" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {file.name}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {(file.size / (1024 * 1024)).toFixed(2)} MB
-                      </p>
-                    </div>
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Output Section */}
+      {transcription && (
+        <div className="mt-16 mx-auto w-full sm:w-[80%] bg-[#f9f1f3] text-[#a94064] border border-[#a94064] rounded-2xl px-8 py-6 shadow-lg">
+          <h2 className="text-2xl font-bold mb-4">Transcription Result:</h2>
+          <p className="text-lg leading-relaxed">{transcription}</p>
         </div>
+      )}
 
-        {/* Recent Analyses - Right Side */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full flex flex-col">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Recent Analyses
-            </h2>
-            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-              View All
-            </button>
-          </div>
-          
-          <div className="space-y-4 flex-1">
-            {recentAnalyses.map((analysis) => (
-              <div key={analysis.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="flex items-center space-x-4">
-                  <div className="flex-shrink-0">
-                    {analysis.status === 'completed' ? (
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {analysis.filename}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {analysis.type} • {analysis.timestamp}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="text-right">
-                  {analysis.authenticity && (
-                    <div className="flex items-center space-x-2">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        analysis.authenticity > 90 
-                          ? 'bg-green-100 text-green-700' 
-                          : analysis.authenticity > 70 
-                          ? 'bg-yellow-100 text-yellow-700'
-                          : 'bg-red-100 text-red-700'
-                      }`}>
-                        {analysis.authenticity > 90 ? (
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                        ) : (
-                          <AlertTriangle className="w-3 h-3 mr-1" />
-                        )}
-                        {analysis.authenticity.toFixed(1)}% Authentic
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-            
-            {/* Add some padding at the bottom to match the Quick Actions height */}
-            <div className="flex-1"></div>
-          </div>
+      {sentiment && (
+        <div className="mt-10 mx-auto w-full sm:w-[80%] bg-[#f2e6ea] text-[#a94064] border border-[#a94064] rounded-2xl px-8 py-6 shadow-lg">
+          <h2 className="text-2xl font-bold mb-4">Sentiment Result:</h2>
+          <p className="text-lg leading-relaxed">{sentiment}</p>
         </div>
-      </div>
+      )}
     </div>
   );
 };

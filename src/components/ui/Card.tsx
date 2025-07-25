@@ -1,47 +1,16 @@
-﻿import React from 'react';
+﻿// src/components/ui/Card.tsx
+import React from 'react';
 
 interface CardProps {
+  title?: string;
   children: React.ReactNode;
   className?: string;
-  padding?: 'none' | 'sm' | 'md' | 'lg';
-  shadow?: 'none' | 'sm' | 'md' | 'lg';
-  border?: boolean;
-  hover?: boolean;
 }
 
-const Card: React.FC<CardProps> = ({ 
-  children, 
-  className = '', 
-  padding = 'md',
-  shadow = 'sm',
-  border = true,
-  hover = false
-}) => {
-  const paddingClasses = {
-    none: '',
-    sm: 'p-3',
-    md: 'p-6',
-    lg: 'p-8'
-  };
-
-  const shadowClasses = {
-    none: '',
-    sm: 'shadow-sm',
-    md: 'shadow-md',
-    lg: 'shadow-lg'
-  };
-
-  const baseClasses = `
-    bg-white rounded-xl 
-    ${border ? 'border border-gray-200' : ''} 
-    ${shadowClasses[shadow]} 
-    ${paddingClasses[padding]}
-    ${hover ? 'transition-shadow duration-200 hover:shadow-md' : ''}
-    ${className}
-  `;
-
+const Card: React.FC<CardProps> = ({ title, children, className = '' }) => {
   return (
-    <div className={baseClasses}>
+    <div className={`bg-white shadow-md rounded-xl p-6 border border-gray-200 ${className}`}>
+      {title && <h2 className="text-4xl font-semibold mb-4 text-[#a94064]">{title}</h2>}
       {children}
     </div>
   );
