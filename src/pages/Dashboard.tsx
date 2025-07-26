@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import ActionButton from '../components/ui/ActionButton';
+import { transcribeAudio } from "../utils/audiotranscribe";
+import { analyzeSentiment } from "../utils/audiosentiment";
+import { detectGender } from "../utils/genderDetection";
+
 
 const Dashboard: React.FC = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [transcription, setTranscription] = useState<string | null>(null);
   const [sentiment, setSentiment] = useState<string | null>(null);
   const [uploadMessage, setUploadMessage] = useState<string>("");
+  const [gender, setGender] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.length) {
@@ -16,62 +21,47 @@ const Dashboard: React.FC = () => {
       setSentiment(null);
     }
   };
+ const handleTranscribe = async () => {
+  if (!audioFile) {
+    alert("Please upload an audio.");
+    return;
+  }
 
-  const handleTranscribe = async () => {
-    if (!audioFile) {
-      alert("Please upload an audio.");
-      return;
-    }
+  try {
+    const result = await transcribeAudio(audioFile);
+    setTranscription(result);
+  } catch (error) {
+    console.error("Error:", error);
+    setTranscription("An error occurred during transcription.");
+  }
+};
+const handleSentiment = async () => {
+  if (!audioFile) {
+    alert("Please upload an audio.");
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append("file", audioFile);
-
-    try {
-      const response = await fetch("http://127.0.0.1:8000/transcribe/", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Transcription failed");
-      }
-
-      setTranscription(result.transcription);
-    } catch (error) {
-      console.error("Error:", error);
-      setTranscription("An error occurred during transcription.");
-    }
-  };
-
-  const handleSentiment = async () => {
-    if (!audioFile) {
-      alert("Please upload an audio.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", audioFile);
-
-    try {
-      const response = await fetch("http://localhost:8000/sentiment/", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Sentiment analysis failed");
-      }
-
-      setSentiment(result.sentiment);
-    } catch (error) {
-      console.error("Error:", error);
-      setSentiment("An error occurred during sentiment analysis.");
-    }
-  };
+  try {
+    const result = await analyzeSentiment(audioFile);
+    setSentiment(result);
+  } catch (error) {
+    console.error("Error:", error);
+    setSentiment("An error occurred during sentiment analysis.");
+  }
+};
+const handleGenderDetect = async () => {
+  if (!audioFile) {
+    alert("Please upload an audio.");
+    return;
+  }
+  try {
+    const result = await detectGender(audioFile);
+    setGender(result);
+  } catch (error) {
+    console.error("Error:", error);
+    setGender("An error occurred during gender detection.");
+  }
+};
 
   return (
     <div className="min-h-screen bg-white px-6 py-8">
@@ -104,6 +94,8 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-items-center mb-16">
         <ActionButton onClick={handleTranscribe} text="Transcribe" />
         <ActionButton onClick={handleSentiment} text="Sentiment Analysis" />
+        <ActionButton onClick={handleGenderDetect} text="Gender Detection" />
+
       </div>
 
       {/* Output Section */}
@@ -120,6 +112,13 @@ const Dashboard: React.FC = () => {
           <p className="text-lg leading-relaxed">{sentiment}</p>
         </div>
       )}
+      {gender && (
+  <div className="mt-10 mx-auto w-full sm:w-[80%] bg-[#f0e8ec] text-[#a94064] border border-[#a94064] rounded-2xl px-8 py-6 shadow-lg">
+    <h2 className="text-2xl font-bold mb-4">Gender Detection Result:</h2>
+    <p className="text-lg leading-relaxed">{gender}</p>
+  </div>
+)}
+
     </div>
   );
 };
