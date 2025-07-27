@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ActionButton from '../components/ui/ActionButton';
-import { transcribeAudio } from "../utils/audiotranscribe";
+import { handleTranscribe } from "../utils/audiotranscribe";
 import { analyzeSentiment } from "../utils/audiosentiment";
 import { detectGender } from "../utils/genderDetection";
 
@@ -21,20 +21,14 @@ const Dashboard: React.FC = () => {
       setSentiment(null);
     }
   };
- const handleTranscribe = async () => {
+ const handleTranscribeClick = () => {
   if (!audioFile) {
     alert("Please upload an audio.");
     return;
   }
-
-  try {
-    const result = await transcribeAudio(audioFile);
-    setTranscription(result);
-  } catch (error) {
-    console.error("Error:", error);
-    setTranscription("An error occurred during transcription.");
-  }
+  handleTranscribe(audioFile, setTranscription);
 };
+
 const handleSentiment = async () => {
   if (!audioFile) {
     alert("Please upload an audio.");
@@ -91,8 +85,8 @@ const handleGenderDetect = async () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-items-center mb-16">
-        <ActionButton onClick={handleTranscribe} text="Transcribe" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-center mb-16">
+        <ActionButton onClick={handleTranscribeClick} text="Transcribe" />
         <ActionButton onClick={handleSentiment} text="Sentiment Analysis" />
         <ActionButton onClick={handleGenderDetect} text="Gender Detection" />
 

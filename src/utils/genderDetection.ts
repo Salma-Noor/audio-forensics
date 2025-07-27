@@ -13,5 +13,5 @@ export const detectGender = async (audioFile: File): Promise<string> => {
     throw new Error(result.error || "Gender detection failed");
   }
 
-  return result.gender;  // Make sure backend returns {"gender": "Male" or "Female"}
+  return result.gender;  
 };
