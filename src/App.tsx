@@ -1,12 +1,28 @@
 ﻿import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
+import TranscribeResult from './pages/TranscribeResult';
+import SentimentResult from './pages/SentimentResult';
+import GenderResult from './pages/GenderResult';
+import DiarizationResult from './pages/DiarizationResult';
 
-const App: React.FC = () => {
+function App() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Dashboard />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/transcribe-result" element={<TranscribeResult />} />
+        <Route path="/sentiment-result" element={<SentimentResult />} />
+        <Route path="/gender-result" element={<GenderResult />} />
+        <Route path="/diarization-result" element={<DiarizationResult />} />
+      </Routes>
+    </Router>
   );
-};
+}
 
 export default App;
+
+
+
+
+

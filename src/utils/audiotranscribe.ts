@@ -17,7 +17,7 @@ export const transcribeAudio = async (audioFile: File): Promise<string> => {
   return result.transcription;
 };
 
-// ✅ Add this handler function (optional, if you want logic separated)
+// Add this handler function (optional, if you want logic separated)
 export const handleTranscribe = async (
   audioFile: File,
   setTranscription: (value: string) => void

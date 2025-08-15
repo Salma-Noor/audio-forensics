@@ -1,8 +1,9 @@
 export const analyzeSentiment = async (audioFile: File): Promise<string> => {
+  
   const formData = new FormData();
   formData.append("file", audioFile);
 
-  const response = await fetch("http://localhost:8000/sentiment/", {
+  const response = await fetch("http://127.0.0.1:8000/sentiment/", {
     method: "POST",
     body: formData,
   });
