@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import ActionButton from '../components/ui/ActionButton';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import ActionButton from "../components/ui/ActionButton";
 import { handleTranscribe } from "../utils/audiotranscribe";
 import { analyzeSentiment } from "../utils/audiosentiment";
 import { detectGender } from "../utils/genderDetect";
-import { fetchDiarization } from "../utils/diarization"; 
+import { fetchDiarization } from "../utils/diarization";
+import fetchTemporal from "../utils/fetchTemporal";
+
 
 const Dashboard: React.FC = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -28,7 +30,7 @@ const Dashboard: React.FC = () => {
       const result = await new Promise<string>((resolve) => {
         handleTranscribe(audioFile, (res) => resolve(res));
       });
-      navigate('/transcribe-result', { state: { transcription: result } });
+      navigate("/transcribe-result", { state: { transcription: result } });
     } catch (error) {
       console.error("Error during transcription:", error);
       alert("Transcription failed.");
@@ -42,7 +44,7 @@ const Dashboard: React.FC = () => {
     }
     try {
       const result = await analyzeSentiment(audioFile);
-      navigate('/sentiment-result', { state: { sentiment: result } });
+      navigate("/sentiment-result", { state: { sentiment: result } });
     } catch (error) {
       console.error("Error during sentiment analysis:", error);
       alert("Sentiment analysis failed.");
@@ -56,51 +58,56 @@ const Dashboard: React.FC = () => {
     }
     try {
       const result = await detectGender(audioFile);
-      navigate('/gender-result', { state: { genderData: result } });
+      navigate("/gender-result", { state: { genderData: result } });
     } catch (error) {
       console.error("Error during gender detection:", error);
       alert("Gender detection failed.");
     }
   };
 
-  
-
-
   const handleDiarizationClick = async () => {
-  if (!audioFile) {
-    alert("Please upload an audio.");
-    return;
-  }
-
-  console.log("Starting diarization...");
-
-  try {
-    const formData = new FormData();
-    formData.append("file", audioFile);
-
-    const res = await fetch("http://127.0.0.1:8000/diarization/", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!res.ok) {
-      throw new Error(`Backend error: ${res.status} ${res.statusText}`);
+    if (!audioFile) {
+      alert("Please upload an audio.");
+      return;
     }
+    try {
+      const formData = new FormData();
+      formData.append("file", audioFile);
 
-    const result = await res.json();
-    console.log("Diarization result from backend:", result);
+      const res = await fetch("http://127.0.0.1:8000/diarization/", {
+        method: "POST",
+        body: formData,
+      });
 
-    // Navigate with the same key your result page expects
-    navigate("/diarization-result", { state: { diarization: result } });
+      if (!res.ok) {
+        throw new Error(`Backend error: ${res.status} ${res.statusText}`);
+      }
 
-  } catch (error) {
-    console.error("Error during diarization:", error);
-    alert(`Diarization failed: ${
-      error instanceof Error ? error.message : "Unknown error"
-    }`);
-  }
-};
+      const result = await res.json();
+      navigate("/diarization-result", { state: { diarization: result } });
+    } catch (error) {
+      console.error("Error during diarization:", error);
+      alert(
+        `Diarization failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  };
 
+  const handleTemporalClick = async () => {
+    if (!audioFile) {
+      alert("Please upload an audio.");
+      return;
+    }
+    try {
+      const result = await fetchTemporal(audioFile);
+      navigate("/temporal-result", { state: { temporal: result } });
+    } catch (error) {
+      console.error("Error during temporal detection:", error);
+      alert("Temporal inconsistency detection failed.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white px-6 py-8">
@@ -123,19 +130,23 @@ const Dashboard: React.FC = () => {
           className="text-lg text-gray-800 border-2 border-[#a94064] px-6 py-4 rounded-xl w-96 cursor-pointer shadow-md hover:shadow-lg transition"
         />
         {uploadMessage && (
-          <p className="text-md text-gray-700 mt-2 font-medium">{uploadMessage}</p>
+          <p className="text-md text-gray-700 mt-2 font-medium">
+            {uploadMessage}
+          </p>
         )}
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 justify-items-center mb-16">
+      <div className="grid grid-cols-1 sm:grid-cols-5 gap-6 justify-items-center mb-16">
         <ActionButton onClick={handleTranscribeClick} text="Transcribe" />
         <ActionButton onClick={handleSentimentClick} text="Sentiment Analysis" />
         <ActionButton onClick={handleGenderClick} text="Gender Detection" />
         <ActionButton onClick={handleDiarizationClick} text="Diarization" />
+        <ActionButton onClick={handleTemporalClick} text="Temporal Inconsistency" />
       </div>
     </div>
   );
 };
 
 export default Dashboard;
+

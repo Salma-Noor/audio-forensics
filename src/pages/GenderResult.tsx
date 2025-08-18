@@ -48,6 +48,6 @@ const GenderResult: React.FC = () => {
       </button>
     </div>
   );
-};
+};  
 
 export default GenderResult;
