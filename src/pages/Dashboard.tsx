@@ -11,11 +11,43 @@ const Dashboard: React.FC = () => {
   const [uploadMessage, setUploadMessage] = useState<string>("");
   const navigate = useNavigate();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.length) {
       const file = e.target.files[0];
       setAudioFile(file);
       setUploadMessage(`Audio Uploaded: ${file.name}`);
+      
+      // Automatically fetch metadata when file is uploaded
+      await fetchAudioMetadata(file);
+    }
+  };
+
+  // Function to fetch metadata from your FastAPI backend
+  const fetchAudioMetadata = async (file: File) => {
+    setIsLoadingMetadata(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("http://127.0.0.1:8000/metadata/", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Metadata fetch failed: ${response.status}`);
+      }
+
+      const metadataResult = await response.json();
+      setMetadata(metadataResult);
+      console.log("Audio metadata:", metadataResult);
+      return metadataResult;
+    } catch (error) {
+      console.error("Error fetching metadata:", error);
+      setMetadata(null);
+      return null;
+    } finally {
+      setIsLoadingMetadata(false);
     }
   };
 
@@ -62,8 +94,6 @@ const Dashboard: React.FC = () => {
       alert("Gender detection failed.");
     }
   };
-
-  
 
 
   const handleDiarizationClick = async () => {
