@@ -18,15 +18,16 @@ function App() {
         <Route path="/gender-result" element={<GenderResult />} />
         <Route path="/diarization-result" element={<DiarizationResult />} />
         <Route path="/temporal-result" element={<TemporalResult />} />
-      
-    
-
       </Routes>
     </Router>
   );
 }
 
 export default App;
+
+
+
+
 
 
 

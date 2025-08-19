@@ -1,12 +1,10 @@
+// src/pages/Dashboard.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ActionButton from "../components/ui/ActionButton";
 import { handleTranscribe } from "../utils/audiotranscribe";
 import { analyzeSentiment } from "../utils/audiosentiment";
 import { detectGender } from "../utils/genderDetect";
-import { fetchDiarization } from "../utils/diarization";
-import fetchTemporal from "../utils/fetchTemporal";
-
 
 const Dashboard: React.FC = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -101,11 +99,27 @@ const Dashboard: React.FC = () => {
       return;
     }
     try {
-      const result = await fetchTemporal(audioFile);
+      const formData = new FormData();
+      formData.append("file", audioFile);
+
+      const res = await fetch("http://127.0.0.1:8000/detect-temporal-inconsistency/", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error(`Backend error: ${res.status} ${res.statusText}`);
+      }
+
+      const result = await res.json();
       navigate("/temporal-result", { state: { temporal: result } });
     } catch (error) {
       console.error("Error during temporal detection:", error);
-      alert("Temporal inconsistency detection failed.");
+      alert(
+        `Temporal inconsistency detection failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   };
 
@@ -142,6 +156,10 @@ const Dashboard: React.FC = () => {
         <ActionButton onClick={handleSentimentClick} text="Sentiment Analysis" />
         <ActionButton onClick={handleGenderClick} text="Gender Detection" />
         <ActionButton onClick={handleDiarizationClick} text="Diarization" />
+      </div>
+
+      {/* Temporal Inconsistency button on next row */}
+      <div className="flex justify-center mb-16">
         <ActionButton onClick={handleTemporalClick} text="Temporal Inconsistency" />
       </div>
     </div>
@@ -149,4 +167,5 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
+
 

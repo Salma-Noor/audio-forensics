@@ -14,10 +14,15 @@ async function fetchTemporal(audioFile: File) {
     throw new Error("Failed to fetch temporal inconsistency result");
   }
 
-  return await response.json();
+  const result = await response.json();
+
+  // Separate text output and graph, so UI can decide when to show the graph
+  return {
+    textOutput: result.text_output || "",
+    graphBase64: result.graph_base64 || null, // only render when needed
+  };
 }
 
 export default fetchTemporal;
-
 
 
