@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@700&display=swap');
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  background: #030609;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  padding: 0 40px;
+  margin-bottom: 0;
+}
+
+.stat-card {
+  padding: 36px 28px;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  cursor: default;
+}
+
+.stat-card:last-child { border-right: none; }
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 100%, var(--accent, #ff3c3c), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.stat-card:hover::before { opacity: 0.08; }
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent, #ff3c3c);
+  transform: scaleX(0);
+  transition: transform 0.4s ease;
+  box-shadow: 0 0 12px var(--accent, #ff3c3c);
+}
+
+.stat-card:hover::after { transform: scaleX(1); }
+
+.stat-icon {
+  font-size: 22px;
+  color: var(--accent, #ff3c3c);
+  margin-bottom: 10px;
+  opacity: 0.7;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.stat-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 64px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  color: var(--accent, #ff3c3c);
+  line-height: 1;
+  text-shadow: 0 0 30px var(--accent, #ff3c3c);
+  transition: text-shadow 0.3s;
+}
+
+.stat-card:hover .stat-value {
+  text-shadow: 0 0 50px var(--accent, #ff3c3c), 0 0 80px var(--accent, #ff3c3c);
+}
+
+.stat-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #2a4050;
+  margin-top: 8px;
+}
+
+.stat-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: rgba(255,255,255,0.04);
+}
+
+.stat-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent, #ff3c3c);
+  transition: width 1.5s ease;
+}
+
+@media (max-width: 700px) {
+  .stats-row { grid-template-columns: 1fr 1fr; padding: 0; }
+  .stat-value { font-size: 48px; }
+}
